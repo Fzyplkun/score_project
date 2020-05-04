@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      td {
+        width: 100px;
+        height: 30px;
+      }
+      table,
+      tr,
+      td,
+      th {
+        /* 边框间距 */
+        border-collapse: collapse;
+        /*边框线  */
+        border: 1px groove;
+        text-align: center;
+      }
+      input {
+        margin: 10px 0;
+      }
+      #app {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="box">
+        <!-- 查询信息 -->
+        查询：<input
+          type="text"
+          placeholder="请输入查询姓名"
+          v-model="msg"
+          class="user"
+        />
+        <!-- 添加信息 -->
+        <button @click="add">添加信息</button>
+        <!-- 添加信息表单 -->
+        <div v-if="flag">
+          班级：<input type="text" v-model="addMsg.class" autofocus /><br />
+          姓名：<input type="text" v-model="addMsg.name" /><br />
+          学号：<input type="text" v-model="addMsg.number" /><br />
+          <button @click="addmsg">确定</button>
+        </div>
+        <!-- 信息列表 -->
+      </div>
+      <table @click="deleteUser ">
+        <thead>
+          <tr>
+            <th>序号</th>
+            <th>班级</th>
+            <th>姓名</th>
+            <th>学号</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(value,index) in  search(msg)" :key="value.id">
+            <td>{{index+1}}</td>
+            <td>{{value.class}}</td>
+            <td>{{value.name}}</td>
+            <td>{{value.number}}</td>
+            <td>
+              <button :data-id="value.name" title="delete_User">删除</button>
+              <button @click.stop="edit(value.name)">修改</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- 修改信息表单 -->
+      <div v-if="open">
+        班级：<input type="text" v-model="editMsg.class" autofocus /><br />
+        姓名：<input type="text" v-model="editMsg.name" /><br />
+        学号：<input type="text" v-model="editMsg.number" disabled /><br />
+        <button @click="save">确定</button>
+      </div>
+    </div>
+    <script src="../vue.js"></script>
+    <script>
+      var vm = new Vue({
+        el: "#app",
+        data: {
+          msg: "",
+          flag: false,
+          open: false,
+          addMsg: {
+            class: "",
+            name: "",
+            number: ""
+          },
+          editMsg: {
+            class: "",
+            name: "",
+            number: ""
+          },
+          users: [
+            { class: "1班", name: "张三", number: "B18033125" },
+            { class: "1班", name: "李磊", number: "B18033115" },
+            { class: "1班", name: "王麻子", number: "B1803321" },
+            { class: "1班", name: "王建国", number: "B18033113" },
+            { class: "1班", name: "赵钱", number: "B18033126" },
+            { class: "1班", name: "孙李", number: "B18033127" }
+          ]
+        },
+        methods: {
+          // 添加信息
+          add() {
+            this.flag = !this.flag;
+          },
+          addmsg() {
+            let obj = JSON.parse(JSON.stringify(this.addMsg))
+            this.users.push(obj);
+          },
+          // 删除信息
+          deleteUser(event) {
+            let target = event.target;
+            if (target.title=='delete_User') {
+              if(confirm("are you sure wanna delete it?")){
+                this.users.forEach((value, index) => {
+                  if (value.name === target.dataset.id) {
+                   this.users.splice(index, 1);
+                  }
+                });
+              }             
+            }
+          },
+          // 编辑信息
+          edit(name) {
+            this.open = !this.open;
+            this.users.forEach((value, index) => {
+              if (value.name === name) {
+                this.editMsg = value;
+              }
+            });
+          },
+          save() {
+            this.open = !this.open;
+          },
+          // 搜索信息
+          search(keyword) {
+            let newUsers = [];
+            this.users.forEach(value => {
+              if (value.name.indexOf(keyword) != -1) {
+                newUsers.push(value);
+              }
+            });
+            return newUsers;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
