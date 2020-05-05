@@ -18,15 +18,31 @@
         </div>
         <!-- 添加信息 -->
         <Button type="primary" @click="modal1 = true">增加信息</Button>
-        <Modal
-          v-model="modal1"
-          title="普通的Modal对话框标题"
-          @on-ok="ok"
-          @on-cancel="cancel"
-        >
-          <p>对话框内容</p>
-          <p>对话框内容</p>
-          <p>对话框内容</p>
+        <Modal v-model="modal1" title="请输入需要填写的信息" @on-ok="ok">
+          <!-- 对话框表单信息 -->
+          <Form
+            ref="formValidate"
+            :model="formValidate"
+            :rules="ruleValidate"
+            :label-width="80"
+          >
+            <!-- 姓名 -->
+            <FormItem label="姓名：" prop="name">
+              <Input
+                v-model="formValidate.name"
+                placeholder="请输入姓名"
+                autofocus
+              />
+            </FormItem>
+            <!-- 班级 -->
+            <FormItem label="姓名：" prop="grade">
+              <Input v-model="formValidate.grade" placeholder="请输入班级" />
+            </FormItem>
+            <!-- 学号 -->
+            <FormItem label="学号：" prop="num">
+              <Input v-model="formValidate.num" placeholder="请输入学号" />
+            </FormItem>
+          </Form>
         </Modal>
       </div>
       <!-- 信息区 -->
@@ -42,38 +58,30 @@
             @click="edit(index)"
             >修改</Button
           >
+          <!-- 修改信息对话框 -->
+          <Modal v-model="modal2" title="请输入需要修改的信息">
+            <Form ref="editMsg" :model2="editMsg" :label-width="80">
+              <!-- 姓名 -->
+              <FormItem label="姓名：" prop="name">
+                <Input
+                  v-model="editMsg.name"
+                  placeholder="请输入姓名"
+                  autofocus
+                />
+              </FormItem>
+              <!-- 班级 -->
+              <FormItem label="姓名：" prop="grade">
+                <Input v-model="editMsg.grade" placeholder="请输入班级" />
+              </FormItem>
+              <!-- 学号 -->
+              <FormItem label="学号：" prop="num">
+                <Input v-model="editMsg.num" placeholder="请输入学号" />
+              </FormItem>
+            </Form>
+          </Modal>
           <Button type="error" size="small" @click="remove(index)">删除</Button>
         </template>
       </Table>
-      <!-- 添加信息对话框 -->
-      <div>
-        <Modal
-          :visible.sync="modal1"
-          title="请按格式填写信息"
-          @on-ok="ok"
-          @on-cancel="cancel"
-        >
-        <!-- 表单信息 -->
-        <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80">
-            <!-- 姓名 -->
-          <FormItem label="Name" prop="name">
-            <Input v-model="formValidate.name" placeholder="Enter your name"/>
-          </FormItem>
-            <!-- 班级 -->
-            <FormItem label="Grade" prop="grade">
-              <Select v-model="formValidate.city" placeholder="请选择班级">
-                  <Option value="beijing">New York</Option>
-                  <Option value="shanghai">London</Option>
-                  <Option value="shenzhen">Sydney</Option>
-              </Select>
-          </FormItem>
-          <!-- 学号 -->
-          <FormItem label="E-mail" prop="mail">
-            <Input v-model="formValidate.mail" placeholder="Enter your e-mail"/>
-          </FormItem>
-        </Form>
-        </Modal>
-      </div>
     </div>
   </div>
 </template>
@@ -85,10 +93,30 @@ export default {
       msg: "",
       // 开启对话框
       modal1: false,
-      model:'',
-      ruleValidate:"",
-      formValidate:'',
-      rules:'',
+      modal2: false,
+      // ruleValidate:"",
+      formValidate: {
+        name: "",
+        grade:"",
+        num: "",
+      },
+      editMsg:{
+        name: "",
+        grade:"",
+        num: "",
+      },
+      ruleValidate: {
+        name: [{ required: true, message: "请填写姓名", trigger: "blur" }],
+        grade: [{ required: true, message: "请填写班级", trigger: "blur" }],
+        num: [
+          {
+            required: true,
+            message: "请填写学号",
+            trigger: "blur",
+            type: "number",
+          },
+        ],
+      },
       columns12: [
         {
           type: "index",
@@ -96,16 +124,16 @@ export default {
           align: "center",
         },
         {
-          title: "班级",
+          title: "姓名",
           slot: "name",
         },
         {
-          title: "姓名",
-          key: "age",
+          title: "班级",
+          key: "grade",
         },
         {
           title: "学号",
-          key: "address",
+          key: "num",
         },
         {
           title: "Action",
@@ -115,26 +143,12 @@ export default {
         },
       ],
       data6: [
-        {
-          name: "John Brown",
-          age: 18,
-          address: "New York No. 1 Lake Park",
-        },
-        {
-          name: "Jim Green",
-          age: 24,
-          address: "London No. 1 Lake Park",
-        },
-        {
-          name: "Joe Black",
-          age: 30,
-          address: "Sydney No. 1 Lake Park",
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park",
-        },
+        { name: "张三", grade: "1班", num: "B18033125" },
+        { name: "李磊", grade: "1班",  num: "B18033115" },
+        { name: "王麻子",grade: "1班", num: "B1803321" },
+        { name: "王建国", grade: "1班", num: "B18033113" },
+        { name: "赵钱",grade: "1班",  num: "B18033126" },
+        { name: "孙李",grade: "1班",  num: "B18033127" },
       ],
     };
   },
@@ -148,15 +162,13 @@ export default {
       });
       return newUsers;
     },
-    
+
     ok() {
-      this.$Message.info("点击了确定");
+      // this.$Message.info("点击了确定");
+      let obj = JSON.parse(JSON.stringify(this.formValidate));
+      this.data6.push(obj);
     },
-    cancel() {
-      this.$Message.info("点击了取消");
-    },
-    // edit(index){
-    // },
+
     // remove(index){
     // }
   },
